@@ -5,11 +5,12 @@ import React, {
   useMemo,
   useLayoutEffect,
 } from 'react';
-import { Image } from 'react-native';
+import { Image, Alert } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Modal from '../../components/Modal';
 import formatValue from '../../utils/formatValue';
 
 import api from '../../services/api';
@@ -65,6 +66,7 @@ const FoodDetails: React.FC = () => {
   const [extras, setExtras] = useState<Extra[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const [foodQuantity, setFoodQuantity] = useState(1);
+  const [showModal, setShowModal] = useState(false);
 
   const navigation = useNavigation();
   const route = useRoute();
@@ -184,6 +186,28 @@ const FoodDetails: React.FC = () => {
 
   async function handleFinishOrder(): Promise<void> {
     // Finish the order and save on the API
+
+    try {
+      const order = {
+        ...food,
+        quantity: foodQuantity,
+        extras,
+        cartTotal,
+      };
+
+      await api.post('orders', order);
+
+      setShowModal(true);
+
+      setTimeout(() => {
+        setShowModal(false);
+        navigation.navigate('OrderDetails', {
+          id: food.id,
+        });
+      }, 2000);
+    } catch (error) {
+      Alert.alert('Erro ao efetuar o pedido');
+    }
   }
 
   // Calculate the correct icon name
@@ -209,7 +233,7 @@ const FoodDetails: React.FC = () => {
   return (
     <Container>
       <Header />
-
+      {showModal && <Modal />}
       <ScrollContainer>
         <FoodsContainer>
           <Food>
