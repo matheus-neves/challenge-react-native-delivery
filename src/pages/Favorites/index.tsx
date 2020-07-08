@@ -30,7 +30,7 @@ interface Food {
 
 const Favorites: React.FC = () => {
   const [favorites, setFavorites] = useState<Food[]>([]);
-  const isFocused = useIsFocused();
+  // const isFocused = useIsFocused();
 
   async function loadFavorites(): Promise<void> {
     const response = await api.get<Food[]>('favorites');
@@ -43,7 +43,7 @@ const Favorites: React.FC = () => {
 
   useEffect(() => {
     loadFavorites();
-  }, [isFocused]);
+  }, []);
 
   return (
     <Container>
