@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { Image } from 'react-native';
 
 import api from '../../services/api';
@@ -25,18 +26,29 @@ interface Food {
   price: number;
   formattedValue: number;
   thumbnail_url: string;
+  cartTotal: string;
 }
 
 const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Food[]>([]);
+  // const isFocused = useIsFocused();
+  const { navigate } = useNavigation();
 
   useEffect(() => {
     async function loadOrders(): Promise<void> {
-      // Load orders from API
+      const response = await api.get<Food[]>('orders');
+
+      setOrders(response.data);
     }
 
     loadOrders();
   }, []);
+
+  async function handleNavigate(id: number): Promise<void> {
+    navigate('OrderDetails', {
+      id,
+    });
+  }
 
   return (
     <Container>
@@ -49,7 +61,11 @@ const Orders: React.FC = () => {
           data={orders}
           keyExtractor={item => String(item.id)}
           renderItem={({ item }) => (
-            <Food key={item.id} activeOpacity={0.6}>
+            <Food
+              key={item.id}
+              activeOpacity={0.6}
+              onPress={() => handleNavigate(item.id)}
+            >
               <FoodImageContainer>
                 <Image
                   style={{ width: 88, height: 88 }}
@@ -59,7 +75,7 @@ const Orders: React.FC = () => {
               <FoodContent>
                 <FoodTitle>{item.name}</FoodTitle>
                 <FoodDescription>{item.description}</FoodDescription>
-                <FoodPricing>{item.formattedPrice}</FoodPricing>
+                <FoodPricing>{item.cartTotal}</FoodPricing>
               </FoodContent>
             </Food>
           )}
